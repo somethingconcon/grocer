@@ -3,7 +3,7 @@ package geezeo.grocer
 import
   akka.actor.ActorSystem,
   akka.actor.Props,
-  com.typesafe.config.ConfigFactory
+  com.typesafe.config.ConfigFactory,
   geezeo.grocer.listeners.GrocerListener
 
 

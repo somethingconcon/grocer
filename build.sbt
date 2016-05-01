@@ -20,7 +20,7 @@ val project = Project(
       "com.typesafe.akka" %% "akka-cluster"            % akkaVersion,
       "com.typesafe.akka" %% "akka-cluster-metrics"    % akkaVersion,
       "com.typesafe.akka" %% "akka-cluster-tools"      % akkaVersion,
-      "com.typesafe.akka" %% "akka-http"               % akkaVersion,
+      "com.typesafe.akka" %% "akka-http-core"          % akkaVersion,
       "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion,
       "com.typesafe.akka" %% "akka-remote"             % akkaVersion,
       "org.scalatest"     %% "scalatest"               % "2.2.1"       % "test",
