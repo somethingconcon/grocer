@@ -1,14 +1,19 @@
 package geezeo.grocer
 
-import 
-  com.typesafe.config.ConfigFactory,
+import
   akka.actor.ActorSystem,
-  akka.actor.Props
+  akka.actor.Props,
+  com.typesafe.config.ConfigFactory
+  geezeo.grocer.listeners.GrocerListener
+
 
 object Grocer extends App {
   
   // get defualt args for cluster
-  startup(args)
+  if (args.isEmpty)
+    startup(Seq("2551", "2552", "0"))
+  else
+    startup(args)
 
   def startup(ports: Seq[String]): Unit = {
     ports foreach { port =>
@@ -17,9 +22,10 @@ object Grocer extends App {
         withFallback(ConfigFactory.load())
 
       // Create an Akka system
-      val system = ActorSystem("ClusterSystem", config)
+      val system = ActorSystem("GrocerSystem", config)
+      
       // Create an actor that handles cluster domain events
-      system.actorOf(Props[SimpleClusterListener], name = "clusterListener")
+      system.actorOf(Props[GrocerListener], name = "grocerListener")
     }
   }
 

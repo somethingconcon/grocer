@@ -17,18 +17,19 @@ val project = Project(
     
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor"              % akkaVersion,
-      "com.typesafe.akka" %% "akka-remote"             % akkaVersion,
       "com.typesafe.akka" %% "akka-cluster"            % akkaVersion,
       "com.typesafe.akka" %% "akka-cluster-metrics"    % akkaVersion,
       "com.typesafe.akka" %% "akka-cluster-tools"      % akkaVersion,
+      "com.typesafe.akka" %% "akka-http"               % akkaVersion,
       "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion,
+      "com.typesafe.akka" %% "akka-remote"             % akkaVersion,
       "org.scalatest"     %% "scalatest"               % "2.2.1"       % "test",
-      "io.kamon"          %  "sigar-loader" % "1.6.6-rev002"),
+      "io.kamon"          %  "sigar-loader"            % "1.6.6-rev002"),
     
     javaOptions in run ++= Seq(
       "-Xms128m", "-Xmx1024m", "-Djava.library.path=./target/native"),
     Keys.fork in run := true,
-    mainClass in (Compile, run) := Some("sample.cluster.simple.SimpleClusterApp"),
+    mainClass in (Compile, run) := Some("geezeo.grocer.Grocer"),
     
     // make sure that MultiJvm test are compiled by the default test compilation
     compile in MultiJvm <<= (compile in MultiJvm) triggeredBy (compile in Test),

@@ -1,19 +1,25 @@
-package sample.cluster.simple
+package geezeo.grocer.listeners
 
-import akka.cluster.Cluster
-import akka.cluster.ClusterEvent._
-import akka.actor.ActorLogging
-import akka.actor.Actor
+import 
+  akka.actor.ActorLogging,
+  akka.actor.Actor,
+  akka.cluster.Cluster,
+  akka.cluster.ClusterEvent._
 
-class SimpleClusterListener2 extends Actor with ActorLogging {
+/**
+  The main listener for the Grocer Application. Handle to distribution of all events
+  coming into the cluster.
+*/
+
+class GrocerListener extends Actor with ActorLogging {
 
   val cluster = Cluster(context.system)
 
   // subscribe to cluster changes, re-subscribe when restart 
   override def preStart(): Unit = {
-    //#subscribe
+
     cluster.subscribe(self, classOf[MemberEvent], classOf[UnreachableMember])
-    //#subscribe
+
   }
   override def postStop(): Unit = cluster.unsubscribe(self)
 
