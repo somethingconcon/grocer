@@ -34,4 +34,5 @@ class GrocerListener extends Actor with ActorLogging {
         member.address, previousStatus)
     case _: MemberEvent => // ignore
   }
+  
 }

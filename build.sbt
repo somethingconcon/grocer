@@ -10,22 +10,28 @@ val project = Project(
   .settings(SbtMultiJvm.multiJvmSettings: _*)
   .settings(
     name := "grocer",
-    version := "2.4-SNAPSHOT",
+    version := "0.0.0.1-SNAPSHOT",
     scalaVersion := "2.11.8",
     scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.8", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint"),
     javacOptions in Compile ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked", "-Xlint:deprecation"),
 
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-actor"              % akkaVersion,
-      "com.typesafe.akka" %% "akka-cluster"            % akkaVersion,
-      "com.typesafe.akka" %% "akka-cluster-metrics"    % akkaVersion,
-      "com.typesafe.akka" %% "akka-cluster-tools"      % akkaVersion,
-      "com.typesafe.akka" %% "akka-http-core"          % akkaVersion,
-      "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion,
-      "com.typesafe.akka" %% "akka-remote"             % akkaVersion,
-      "org.scalatest"     %% "scalatest"               % "2.2.1"        % "test",
-      "io.kamon"          %  "sigar-loader"            % "1.6.6-rev002"),
+      "com.typesafe.akka"         %% "akka-actor"              % akkaVersion,
+      "com.typesafe.akka"         %% "akka-cluster"            % akkaVersion,
+      "com.typesafe.akka"         %% "akka-cluster-metrics"    % akkaVersion,
+      "com.typesafe.akka"         %% "akka-cluster-tools"      % akkaVersion,
+      "com.typesafe.akka"         %% "akka-http-core"          % akkaVersion,
+      "com.typesafe.akka"         %% "akka-persistence"        % akkaVersion,
+      "com.typesafe.akka"         %% "akka-multi-node-testkit" % akkaVersion,
+      "com.typesafe.akka"         %% "akka-remote"             % akkaVersion,
+      "io.spray"                  %% "spray-client"            % "1.3.3",
+      "org.scalatest"             %% "scalatest"               % "2.2.1"       % "test",
+      "io.kamon"                  %  "sigar-loader"            % "1.6.6-rev002",
+      "org.iq80.leveldb"          %  "leveldb"                 % "0.7",
+      "org.fusesource.leveldbjni" % "leveldbjni-all"           % "1.8"
 
+      ),
+    
     javaOptions in run ++= Seq(
       "-Xms128m", "-Xmx1024m", "-Djava.library.path=./target/native"),
     Keys.fork in run := true,
