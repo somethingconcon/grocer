@@ -14,7 +14,7 @@ val project = Project(
     scalaVersion := "2.11.8",
     scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.8", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint"),
     javacOptions in Compile ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked", "-Xlint:deprecation"),
-    
+
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor"              % akkaVersion,
       "com.typesafe.akka" %% "akka-cluster"            % akkaVersion,
@@ -23,20 +23,20 @@ val project = Project(
       "com.typesafe.akka" %% "akka-http-core"          % akkaVersion,
       "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion,
       "com.typesafe.akka" %% "akka-remote"             % akkaVersion,
-      "org.scalatest"     %% "scalatest"               % "2.2.1"       % "test",
+      "org.scalatest"     %% "scalatest"               % "2.2.1"        % "test",
       "io.kamon"          %  "sigar-loader"            % "1.6.6-rev002"),
-    
+
     javaOptions in run ++= Seq(
       "-Xms128m", "-Xmx1024m", "-Djava.library.path=./target/native"),
     Keys.fork in run := true,
     mainClass in (Compile, run) := Some("geezeo.grocer.Grocer"),
-    
+
     // make sure that MultiJvm test are compiled by the default test compilation
     compile in MultiJvm <<= (compile in MultiJvm) triggeredBy (compile in Test),
-    
+
     // disable parallel tests
     parallelExecution in Test := false,
-    
+
     // make sure that MultiJvm tests are executed by the default test target,
     // and combine the results from ordinary test and multi-jvm tests
     executeTests in Test <<= (executeTests in Test, executeTests in MultiJvm) map {
