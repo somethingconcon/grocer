@@ -1,38 +1,37 @@
 package geezeo.grocer.listeners
 
-import 
-  akka.actor.ActorLogging,
-  akka.actor.Actor,
-  akka.cluster.Cluster,
-  akka.cluster.ClusterEvent._
-
 /**
   The main listener for the Grocer Application. Handle to distribution of all events
   coming into the cluster.
 */
 
-class GrocerListener extends Actor with ActorLogging {
+import 
+	akka.actor.RootActorPath,
+	akka.cluster.Member
 
-  val cluster = Cluster(context.system)
+class GrocerListener extends ClusterListener {
 
-  // subscribe to cluster changes, re-subscribe when restart 
-  override def preStart(): Unit = {
+	/*
+		ACTOR EVENTS FOR WORK
+	*/
+	case class DailyHarvest(data: Any)     extends ClusterWorkEvent(data)
+	case class OneDemandHarvest(data: Any) extends ClusterWorkEvent(data)
+	case class HarvestPartner(data: Any)   extends ClusterWorkEvent(data)
+	/*
+    grocer.worker.events
+  */
+	
+	override def work(work: ClusterWorkEvent): Unit = {
+		work match {
+			case DailyHarvest(data)     => log.info("daily harvest")
+			case OneDemandHarvest(data) => log.info("on demand harvest")
+			case HarvestPartner(data)   => log.info("harvest partner")
+			case _                      => // ignore cannot work 
+		}
+	}
 
-    cluster.subscribe(self, classOf[MemberEvent], classOf[UnreachableMember])
-
-  }
-  override def postStop(): Unit = cluster.unsubscribe(self)
-
-  def receive = {
-    case state: CurrentClusterState =>
-      log.info("Current members: {}", state.members.mkString(", "))
-    case MemberUp(member) =>
-      log.info("Member is Up: {}", member.address)
-    case UnreachableMember(member) =>
-      log.info("Member detected as unreachable: {}", member)
-    case MemberRemoved(member, previousStatus) =>
-      log.info("Member is Removed: {} after {}",
-        member.address, previousStatus)
-    case _: MemberEvent => // ignore
-  }
+	override def register(member: Member) =  {
+		if (member.hasRole("harvester"))
+    	context.actorSelection(RootActorPath(member.address) / "user" / "harvester") ! RegisterNode
+  } 
 }
