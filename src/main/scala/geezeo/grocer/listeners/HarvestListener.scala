@@ -7,11 +7,10 @@ import
   akka.cluster.ClusterEvent._
 
 /**
-  The main listener for the Grocer Application. Handle to distribution of all events
-  coming into the cluster.
+  The main listener for the Grocer Application. Handle to distribution of all cluster events.
 */
 
-class GrocerListener extends Actor with ActorLogging {
+class HarvestListener extends Actor with ActorLogging {
 
   val cluster = Cluster(context.system)
 
@@ -32,7 +31,7 @@ class GrocerListener extends Actor with ActorLogging {
     case MemberRemoved(member, previousStatus) =>
       log.info("Member is Removed: {} after {}",
         member.address, previousStatus)
-    case _: MemberEvent => // ignore
+    case _: MemberEvent => // ignore for now
   }
-  
+
 }

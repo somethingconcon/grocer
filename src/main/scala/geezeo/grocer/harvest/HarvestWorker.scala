@@ -1,74 +1,36 @@
-package geezeo.harvestor
+package geezeo.grocer.harvest
 
-import 
-  akka.actor.Actor,
-  akka.actor.ActorLogging,
-  akka.actor.ActorInitializationException,
-  akka.actor.ActorRef,
-  akka.actor.DeathPactException,
-  akka.actor.Props,
-  akka.actor.OneForOneStrategy,
-  akka.actor.ReceiveTimeout,
-  akka.actor.SupervisorStrategy.Stop,
-  akka.actor.SupervisorStrategy.Restart,
-  akka.actor.Terminated,
-  akka.cluster.client.ClusterClient.SendToAll,
-  java.util.UUID,
-  scala.concurrent.duration._
+import java.util.UUID
+import scala.concurrent.duration._
+import akka.actor.Actor
+import akka.actor.ActorLogging
+import akka.actor.ActorRef
+import akka.actor.Props
+import akka.actor.ReceiveTimeout
+import akka.actor.Terminated
+import akka.cluster.client.ClusterClient.SendToAll
+import akka.actor.OneForOneStrategy
+import akka.actor.SupervisorStrategy.Stop
+import akka.actor.SupervisorStrategy.Restart
+import akka.actor.ActorInitializationException
+import akka.actor.DeathPactException
 
-/**
-  Object HarvestWorker
-
-  props for creating new workers ? I think that's for new workers
-
-  case classes for Message Passing
-*/
 object HarvestWorker {
 
   def props(clusterClient: ActorRef, workExecutorProps: Props, registerInterval: FiniteDuration = 10.seconds): Props =
-    Props(classOf[HarvestWorker], clusterClient, workExecutorProps, registerInterval)
+    Props(classOf[Worker], clusterClient, workExecutorProps, registerInterval)
 
   case class WorkComplete(result: Any)
 }
 
-/**
-  Harvester Workflow ->
-    - Create UUID for harvest session
-    - Persist Data for Harvest Session
-    -> Kickoff Harvest Workflow
-      - Establish Session
-      - Load Platform data endpoint: userData: (userId, password)
-      -> Initialize Request for User Profile
-        - 
-*/
 class HarvestWorker(clusterClient: ActorRef, workExecutorProps: Props, registerInterval: FiniteDuration)
   extends Actor with ActorLogging {
   
+  import Worker._
+  import MasterWorkerProtocol._
   import context.dispatcher
-  import HarvestWorker._
-  import geezeo.grocer.worker.protocol.MasterHarvestWorkerEvents._
-
-  /* ACTORS EVENTS */
-  /*
-    Work Events, should go somewhere else
-  */
-  case class Work(workId: String, job: Any)
-  case class WorkResult(workId: String, result: Any)
-  /*
-    grocer.worker.events
-  */
-
-  /*
-    master work events are in MasterHarvestWorkerProtocol.scala worker protocols
-    are going to be the events that actors can receive 
-  */
 
   val workerId = UUID.randomUUID().toString
-
-
-  // using the singleton pattern to pass all work registration to the
-  // a deligator
-  // Routers / Deligators / Singleton / Oh My
   val registerTask = context.system.scheduler.schedule(0.seconds, registerInterval, clusterClient,
     SendToAll("/user/master/singleton", RegisterWorker(workerId)))
   val workExecutor = context.watch(context.actorOf(workExecutorProps, "exec"))
@@ -79,9 +41,6 @@ class HarvestWorker(clusterClient: ActorRef, workExecutorProps: Props, registerI
     case None         => throw new IllegalStateException("Not working")
   }
 
-  /*
-    Manage the workers exceptions
-  */
   override def supervisorStrategy = OneForOneStrategy() {
     case _: ActorInitializationException => Stop
     case _: DeathPactException           => Stop
@@ -91,15 +50,12 @@ class HarvestWorker(clusterClient: ActorRef, workExecutorProps: Props, registerI
       Restart
   }
 
-  /*
-    Cancel any work that is happening when a worker is ! Stopped
-  */
   override def postStop(): Unit = registerTask.cancel()
 
   def receive = idle
 
   def idle: Receive = {
-    case WorkIsReady =>
+    case WorkIsReadyWorkIsReady =>
       sendToMaster(WorkerRequestsWork(workerId))
 
     case Work(workId, job) =>
@@ -117,7 +73,7 @@ class HarvestWorker(clusterClient: ActorRef, workExecutorProps: Props, registerI
       context.become(waitForWorkIsDoneAck(result))
 
     case _: Work =>
-      log.info("I'm working.")
+      log.info("Yikes. Master told me to do work, while I'm working.")
   }
 
   def waitForWorkIsDoneAck(result: Any): Receive = {
