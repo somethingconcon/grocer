@@ -26,9 +26,10 @@ object HarvestWorker {
 class HarvestWorker(clusterClient: ActorRef, workExecutorProps: Props, registerInterval: FiniteDuration)
   extends Actor with ActorLogging {
   
-  import Worker._
-  import MasterWorkerProtocol._
-  import context.dispatcher
+  import
+    context.dispatcher,
+    HarvestWorker._,
+    MasterHarvestWorkerProtocol._
 
   val workerId = UUID.randomUUID().toString
   val registerTask = context.system.scheduler.schedule(0.seconds, registerInterval, clusterClient,
@@ -55,7 +56,7 @@ class HarvestWorker(clusterClient: ActorRef, workExecutorProps: Props, registerI
   def receive = idle
 
   def idle: Receive = {
-    case WorkIsReadyWorkIsReady =>
+    case WorkIsReady =>
       sendToMaster(WorkerRequestsWork(workerId))
 
     case Work(workId, job) =>

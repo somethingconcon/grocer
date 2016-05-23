@@ -1,6 +1,7 @@
 package geezeo.grocer.worker.protocol
 
-object MasterHarvestWorkerEvents {
+object MasterHarvestWorkerProtocol {
+  
   // Messages from Workers
   case class RegisterWorker(workerId: String)
   case class WorkerRequestsWork(workerId: String)

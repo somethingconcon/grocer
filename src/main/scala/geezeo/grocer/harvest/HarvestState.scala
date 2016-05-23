@@ -4,11 +4,11 @@ import scala.collection.immutable.Queue
 
 object HarvestState {
 
-  def empty: WorkState = WorkState(
-    pendingWork = Queue.empty,
-    workInProgress = Map.empty,
-    acceptedWorkIds = Set.empty,
-    doneWorkIds = Set.empty)
+  def empty: HarvestState = HarvestState(
+                              pendingWork = Queue.empty,
+                              workInProgress = Map.empty,
+                              acceptedWorkIds = Set.empty,
+                              doneWorkIds = Set.empty)
 
   trait HarvestEvent
   case class WorkAccepted(work: Work)                   extends HarvestEvent
@@ -26,7 +26,7 @@ case class HarvestState private (
   private val acceptedWorkIds: Set[String],
   private val doneWorkIds: Set[String]) {
 
-  import WorkState._
+  import HarvestState._
 
   def hasWork: Boolean = pendingWork.nonEmpty
   def nextWork: Work = pendingWork.head
@@ -34,7 +34,7 @@ case class HarvestState private (
   def isInProgress(workId: String): Boolean = workInProgress.contains(workId)
   def isDone(workId: String): Boolean = doneWorkIds.contains(workId)
 
-  def updated(event: WorkDomainEvent): WorkState = event match {
+  def updated(event: HarvestEvent): HarvestState = event match {
     case WorkAccepted(work) ⇒
       copy(
         pendingWork = pendingWork enqueue work,
